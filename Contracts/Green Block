@@ -1,0 +1,43 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract Project {
+    address public owner;
+    uint public totalCreditsIssued;
+
+    struct GreenCredit {
+        address recipient;
+        uint creditAmount;
+        string description;
+    }
+
+    GreenCredit[] public credits;
+
+    event CreditIssued(address indexed to, uint amount, string description);
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only the owner can perform this action");
+        _;
+    }
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    function issueCredit(address _recipient, uint _amount, string memory _desc) public onlyOwner {
+        require(_amount > 0, "Credit amount must be positive");
+        credits.push(GreenCredit(_recipient, _amount, _desc));
+        totalCreditsIssued += _amount;
+        emit CreditIssued(_recipient, _amount, _desc);
+    }
+
+    function getTotalCredits() public view returns (uint) {
+        return totalCreditsIssued;
+    }
+
+    function getCreditDetails(uint index) public view returns (address, uint, string memory) {
+        require(index < credits.length, "Invalid index");
+        GreenCredit memory credit = credits[index];
+        return (credit.recipient, credit.creditAmount, credit.description);
+    }
+}
